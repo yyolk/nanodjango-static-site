@@ -15,4 +15,4 @@ It demonstrates generating static HTML from Markdown pages and deploying via Git
 - Static generation for easy deployment
 - Hot reload during development with django-browser-reload
 
-Check out the [About](about/) page or the original [blog post](https://nanodjango.dev/blog/2026-10-static-site-builder/).
+Check out the [About](about/) page, the [Blog](blog/) (file-based dated posts), or the original [blog post](https://nanodjango.dev/blog/2026-10-static-site-builder/).
