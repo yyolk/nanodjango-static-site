@@ -31,6 +31,11 @@ jobs:
           uv run website.py manage distill generate \
             --output-directory=output/ --collectstatic --force
 
+      - name: List generated output
+        run: |
+          echo "=== Output tree ==="
+          find output -type f | sort
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
