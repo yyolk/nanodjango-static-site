@@ -25,8 +25,6 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Generate static site
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}
         run: |
           uv run website.py manage distill generate \
             --output-directory=output/ --collectstatic --force
