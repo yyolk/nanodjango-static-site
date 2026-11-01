@@ -29,6 +29,18 @@ jobs:
           uv run website.py manage distill generate \
             --output-directory=output/ --collectstatic --force
 
+      - name: Prefix absolute links for project site
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: |
+          # Rewrite root-absolute href/src attributes so they work under the
+          # GitHub Pages project path without a custom domain.
+          # Leaves protocol-relative (//) and already-prefixed links alone.
+          find output -name '*.html' -type f -exec sed -i \
+            -e 's|href="/\([^/]\)|href="'"$BASE_PATH"'/\1|g' \
+            -e 's|src="/\([^/]\)|src="'"$BASE_PATH"'/\1|g' \
+            {} +
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
