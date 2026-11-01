@@ -11,25 +11,31 @@
 import os
 from nanodjango import Django
 
-# Base path for GitHub Pages project sites (e.g. /nanodjango-static-site).
-# Set BASE_PATH in the workflow; leave unset for local runs (no base tag).
+# Base path for GitHub Pages project sites.
+# Set BASE_PATH in the workflow only.
 base_path = os.environ.get("BASE_PATH", "")
 
-app = Django(EXTRA_APPS=["django_style"])
-
-# Override base template to inject a <base> tag so absolute links
-# (starting with /) resolve under the project path in the browser.
-# Distill's internal requests are unaffected.
+settings = {}
 if base_path:
-    app.templates["base.html"] = f"""
-{{% extends "django_style/base.html" %}}
-{{% block extra_head %}}
-  <base href="{base_path}/">
-  {{{{ block.super }}}}
-{{% endblock %}}
-"""
+    settings["FORCE_SCRIPT_NAME"] = base_path
 
-app.pages("/", path="pages", context={{"site_title": "Nanodjango Static Site"}})
+app = Django(EXTRA_APPS=["django_style"], **settings)
+
+# Monkeypatch distill's internal request so it doesn't double-prefix.
+# reverse() / {% url %} will still emit the prefixed absolute links,
+# but the internal WSGI request path is stripped of the base path.
+if base_path:
+    from django_distill import request as distill_request
+    _original_internal = distill_request.internal_wsgi_request
+
+    def _patched_internal_wsgi_request(path, *args, **kwargs):
+        if path.startswith(base_path):
+            path = path[len(base_path):] or "/"
+        return _original_internal(path, *args, **kwargs)
+
+    distill_request.internal_wsgi_request = _patched_internal_wsgi_request
+
+app.pages("/", path="pages", context={"site_title": "Nanodjango Static Site"})
 
 if __name__ == "__main__":
     app.invoke(default="run")
