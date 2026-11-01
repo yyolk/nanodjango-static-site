@@ -11,38 +11,29 @@ git checkout blog-model-admin-distill
 uv run website.py
 ```
 
-On first run, nanodjango will create a local SQLite database and a superuser (default password is often `password` or prompted).
+Then:
 
-Then visit:
+1. Visit http://localhost:8000/admin/
+2. Log in (nanodjango creates a superuser on first run; check the terminal for credentials or use the defaults).
+3. Create `Post` objects (title, slug, body). The slug is pre-populated from the title.
+4. Visit http://localhost:8000/blog/ to see the list and individual posts.
 
-- http://localhost:8000/ — the site
-- http://localhost:8000/admin/ — Django admin (create Posts here)
-
-Create a few posts in the admin. The slug is auto-prepopulated from the title.
+The SQLite database is created locally and can be committed if you want the content to travel with the repo (as suggested in the original post). For a pure static workflow you can treat it as a build artifact and `.gitignore` it, loading data via fixtures instead.
 
 ## Build static files
 
-After you have posts in the database:
+After creating posts in the admin:
 
 ```bash
 uv run website.py manage distill generate --output-directory=output/ --collectstatic --force
 ```
 
-This generates:
-
-- `/blog/` — list of posts from the database
-- `/blog/<slug>/` — individual posts
-
-The `distill_func` on the detail view yields the current slugs so distill knows which pages to freeze.
-
-## Notes
-
-- The SQLite database (`db.sqlite3`) holds the post content. It is not committed by default. You can commit it if you want the content to travel with the repo, or treat it as a local/build artifact.
-- The same `FORCE_SCRIPT_NAME` / distill monkey-patch as `main` is present so absolute links work under a GitHub Pages project path.
-- File-based pages under `pages/` continue to work via nanopages.
+This freezes the blog list and detail pages (plus the nanopages content) into the `output/` directory.
 
 ## Deployment
 
-Pushes to `main` (not this branch) trigger the GitHub Pages workflow. This branch is for illustration and local experimentation.
+Pushes to `main` (not this branch) trigger the GitHub Pages workflow. Merge or cherry-pick if you want this approach on the live site.
+
+**Note:** This branch keeps the same `FORCE_SCRIPT_NAME` / distill monkey-patch as main so absolute links work under the GitHub Pages project path.
 
 Based on https://nanodjango.dev/blog/2026-10-static-site-builder/
