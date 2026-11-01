@@ -26,7 +26,7 @@ jobs:
 
       - name: Generate static site
         env:
-          BASE_PATH: /nanodjango-static-site
+          BASE_PATH: /${{ github.event.repository.name }}
         run: |
           uv run website.py manage distill generate \
             --output-directory=output/ --collectstatic --force
